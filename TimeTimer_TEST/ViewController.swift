@@ -12,10 +12,19 @@ class ViewController: UIViewController {
     var labelHour:Int = 0
     var labelMin:Int = 0
     var labelSec:Int = 0
+    var timeMin = 60
+    var timeSec = 60
     override func viewDidLoad() {
         super.viewDidLoad()
         startStopButton.setTitleColor(UIColor.green, for: .normal)
         resetButton.setTitleColor(UIColor.gray, for: .normal)
+        resetButton.setTitle("RESET", for: .normal)
+        resetButton.setTitleColor(UIColor.gray, for: .normal)
+        self.count = 0
+        self.timer.invalidate()
+        self.TimerLabel.text = self.makeTimeString(hours: 0, minutes: 0, seconds: 0)
+        self.startStopButton.setTitle("START", for: .normal)
+        self.startStopButton.setTitleColor(UIColor.green, for: .normal)
         // let's start by drawing a circle somehow
         
         let center = view.center
@@ -113,6 +122,16 @@ class ViewController: UIViewController {
         labelHour = 0
         labelMin = 0
         labelSec = 0
+        let basicAnimation = CABasicAnimation(keyPath: "strokeEnd") //keypath = 0
+        
+        basicAnimation.toValue = 1 //수신기가 보간법을 끝내는 데 사용하는 값을 정의
+        
+        basicAnimation.duration = 0 //애니메이션의 기본 지속 시간(초)을 지정
+        
+        basicAnimation.fillMode = CAMediaTimingFillMode.forwards
+        basicAnimation.isRemovedOnCompletion = false
+        
+        shapeLayer.add(basicAnimation, forKey: "urSoBasic")
         
     }
     @objc func timerCounter() -> Void
@@ -148,6 +167,9 @@ class ViewController: UIViewController {
             timeString += String(format: "%02d", seconds)
             return timeString //timeString의 형태 ->hours : minutes : seconds
         }
+    
+    //시간을 추가하고 없애는 과정
+    
     @IBAction func plusHour(_ sender: UIButton) {
         count += 3600
         labelHour += 1
@@ -156,13 +178,25 @@ class ViewController: UIViewController {
     
     @IBAction func plusMin(_ sender: UIButton) {
         count += 60
-        labelMin += 1
+        if labelMin < 59 {
+            labelMin += 1
+            self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+        } else {
+        labelHour += 1
+        labelMin = 0
         self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+        }
     }
     @IBAction func plusSec(_ sender: UIButton) {
         count += 1
+        if labelSec < 59 {
         labelSec += 1
         self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+        } else {
+            labelMin += 1
+            labelSec = 0
+            self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+        }
     }
     @IBAction func minusHour(_ sender: UIButton) {
         
@@ -175,15 +209,27 @@ class ViewController: UIViewController {
     @IBAction func minusMin(_ sender: UIButton) {
         if count > 59 {
         count -= 60
+            if labelMin > 0 {
         labelMin -= 1
         self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+            }else {
+                labelHour -= 1
+                labelMin = timeMin - 1
+                self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+            }
         }
     }
     @IBAction func minusSec(_ sender: UIButton) {
         if count > 0 {
         count -= 1
+            if labelSec > 0 {
         labelSec -= 1
         self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+            } else {
+                labelMin -= 1
+                labelSec = timeSec - 1
+                self.TimerLabel.text = self.makeTimeString(hours: labelHour, minutes: labelMin, seconds: labelSec)
+            }
         }
     }
 }
